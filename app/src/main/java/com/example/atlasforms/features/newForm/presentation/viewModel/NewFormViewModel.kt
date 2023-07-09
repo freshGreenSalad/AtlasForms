@@ -40,11 +40,9 @@ class NewFormViewModel @Inject constructor(
     fun NewFormEvent(event: OnEventNewForm) {
         when (event) {
             is OnEventNewForm.saveForm -> {
-                if (_newForm.value == SuccessState.Success<AnswerForm>()) {
-                    try{
-                        useCaseSaveForm.invoke(_newForm.value.data!!)
-                    }   catch (_:Exception){}
-                }
+                try{
+                    useCaseSaveForm.invoke(noStatePushForm)
+                }   catch (_:Exception){}
             }
             is OnEventNewForm.updateQuestionAnswer -> {
                 noStatePushForm =

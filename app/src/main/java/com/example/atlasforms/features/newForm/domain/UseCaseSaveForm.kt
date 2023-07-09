@@ -1,5 +1,6 @@
 package com.example.atlasforms.features.newForm.domain
 
+import android.util.Log
 import com.example.atlasforms.Di.IoDispatcher
 import com.example.atlasforms.common.domain.AnswerForm
 import com.example.atlasforms.features.newForm.data.FormRepository
@@ -19,6 +20,7 @@ class UseCaseSaveForm @Inject constructor(
             CoroutineName("Sample CN") + SupervisorJob() + dispatcher
         ) {
             formRepository.saveAnswerForm(form)
+            Log.d("in the save form use case","")
         }
     }
 }

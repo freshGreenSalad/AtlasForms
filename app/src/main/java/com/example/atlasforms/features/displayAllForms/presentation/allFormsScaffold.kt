@@ -2,25 +2,40 @@ package com.example.atlasforms.features.displayAllForms.presentation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.unit.dp
 import com.example.atlasforms.common.domain.AnswerForm
 import com.example.atlasforms.common.domain.SuccessState
 import com.example.atlasforms.common.presentation.CircularLoading
+import com.example.atlasforms.features.displayAllForms.presentation.viewmodel.OnEventAllForm
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllFormsScaffold(
-    forms: State<SuccessState<List<AnswerForm>>>,
-    navigateToNewFormPage: ()-> Unit
-) {
+    forms: State<SuccessState<Flow<List<AnswerForm>>>>,
+    navigateToNewFormPage: ()-> Unit,
+    event :(OnEventAllForm)->Unit
+    ) {
     Scaffold(
         topBar = {AtlasTopAppBar("All Forms")},
         floatingActionButton = {AddNewFormFab(navigateToNewFormPage)}
@@ -30,26 +45,17 @@ fun AllFormsScaffold(
                 .fillMaxSize()
                 .padding(it))
         {
-            AllformsLoadingState(forms)
+            AllformsLoadingState(forms,event)
 
-        }
-    }
-}
-
-@Composable
-fun AnswerFormList(
-    answerFormList: List<AnswerForm>
-) {
-    LazyColumn(){
-        items(answerFormList){ form:AnswerForm ->
-            Text(form.name)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AtlasTopAppBar(title: String) {
+fun AtlasTopAppBar(
+    title: String,
+) {
     TopAppBar(
         title = {
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){Text(title)}},
@@ -65,25 +71,104 @@ fun AddNewFormFab( createNewForm: ()-> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AllformsLoadingState(screenState: State<SuccessState<List<AnswerForm>>>) {
+fun AllformsLoadingState(
+    forms: State<SuccessState<Flow<List<AnswerForm>>>>,
+    event :(OnEventAllForm)->Unit
+) {
     Column {
-
-        Text(screenState.value.data.toString())
-        Text(screenState.value.toString())
-        Text(screenState.value.error?:"no error")
         AnimatedContent(
-            targetState= screenState.value,
+            targetState= forms.value,
             transitionSpec= { slideInHorizontally(tween(500),
                 initialOffsetX = {fullSize -> fullSize })with slideOutHorizontally(tween(500))
             }
         ) { transitionState ->
             when (transitionState) {
-                is SuccessState.Loading<List<AnswerForm>> -> { CircularLoading()}
-                is SuccessState.Failure<List<AnswerForm>> -> { Text("Sorry Something Went Wrong")}
-                is SuccessState.Success<List<AnswerForm>> -> {
-                    AnswerFormList(transitionState.data ?: emptyList<AnswerForm>())
+                is SuccessState.Loading<Flow<List<AnswerForm>>> -> { CircularLoading()}
+                is SuccessState.Failure<Flow<List<AnswerForm>>> -> { Text("Sorry Something Went Wrong")}
+                is SuccessState.Success<Flow<List<AnswerForm>>> -> {
+                    AnswerFormList(transitionState.data ?: flowOf(emptyList<AnswerForm>()), event)
                 }
             }
         }
     }
+}
+
+@Composable
+fun AnswerFormList(
+    answerFormList: Flow<List<AnswerForm>>,
+    event :(OnEventAllForm)->Unit
+) {
+    val scope = answerFormList.collectAsState(initial =  emptyList<AnswerForm>())
+
+    LazyColumn(){
+        items(scope.value){ form ->
+            FormCard(form, event)
+        }
+    }
+}
+
+@Composable
+fun FormCard(
+    form:AnswerForm,
+    event :(OnEventAllForm)->Unit
+) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)
+        .shadow(elevation = 2.dp, shape = RoundedCornerShape(8.dp))
+        .clip(RoundedCornerShape(8.dp))
+        .background(color = MaterialTheme.colorScheme.secondaryContainer)
+    )
+    {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(form.name, modifier = Modifier.padding(4.dp))
+            horizontalLine()
+            Box(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth()) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column(modifier = Modifier.weight(.6f)) {
+                            Text("Number of questions in form", modifier = Modifier.padding(4.dp))
+                            Text("Creation Date", modifier = Modifier.padding(4.dp))
+                        }
+                        Column(modifier = Modifier.weight(.4f)) {
+                            Text(
+                                form.questionList.size.toString(),
+                                modifier = Modifier.padding(4.dp)
+                            )
+                            Text(form.dateCreated, modifier = Modifier.padding(4.dp))
+                        }
+                    }
+                }
+            }
+            horizontalLine()
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(0.dp, 0.dp, 8.dp, 8.dp)
+                    )
+            ) {Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly){
+                Button(modifier = Modifier.padding(4.dp),onClick = {
+
+                }) {
+                    Text("Update")
+                }
+                Button(modifier = Modifier.padding(4.dp),onClick = { event(OnEventAllForm.deleteForm(form)) }) {
+                    Text("Delete")
+                }
+            }
+            }
+        }
+    }
+}
+
+@Composable
+fun horizontalLine() {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(color = Color.Black)
+            .height(1.dp)
+    )
 }

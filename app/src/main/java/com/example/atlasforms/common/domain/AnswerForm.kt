@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity
 data class AnswerForm(
-    @PrimaryKey val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val dateCreated: String = "",
     val email: String = "",
     val name: String = "",
@@ -18,7 +18,7 @@ data class AnswerForm(
 @Entity
 @Serializable
 data class AnswerQuestion(
-    @PrimaryKey val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     val listOfMultiChoiceQuestions: List<OfMultiChoiceQuestions>,
     val chosenMultiChoiceAnswer: String = "",
     val question: String,

@@ -11,6 +11,8 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 class UseCaseGetNewForm @Inject constructor(
@@ -46,8 +48,7 @@ class UseCaseGetNewForm @Inject constructor(
 class FormToAnswerFormConverter(){
     fun formToAnswerForm(form: Form):AnswerForm{
         return AnswerForm(
-            id = form.id,
-            dateCreated = form.dateCreated,
+            dateCreated = SimpleDateFormat("dd/M/yyyy").format(Date()),
             email = form.email,
             name = form.name,
             isSent = false,

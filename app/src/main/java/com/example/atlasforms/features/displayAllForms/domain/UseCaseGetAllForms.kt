@@ -7,6 +7,7 @@ import com.example.atlasforms.features.displayAllForms.data.AllFormsRepositoryIm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -14,7 +15,7 @@ class UseCaseGetAllForms @Inject constructor(
     private val allFormsRepository: AllFormsRepositoryImplimentation,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke(): SuccessState<List<AnswerForm>> {
+    operator fun invoke(): SuccessState<Flow<List<AnswerForm>>> {
         return runBlocking(
             CoroutineName("Sample CN") + SupervisorJob() + dispatcher
         ) {
