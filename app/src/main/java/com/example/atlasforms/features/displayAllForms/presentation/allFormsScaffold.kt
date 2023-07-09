@@ -19,10 +19,11 @@ import com.example.atlasforms.common.presentation.CircularLoading
 @Composable
 fun AllFormsScaffold(
     forms: State<SuccessState<List<AnswerForm>>>,
+    navigateToNewFormPage: ()-> Unit
 ) {
     Scaffold(
         topBar = {AtlasTopAppBar("All Forms")},
-        floatingActionButton = {AddNewFormFab({ })}
+        floatingActionButton = {AddNewFormFab(navigateToNewFormPage)}
     ) {
         Box(
             Modifier
@@ -66,6 +67,10 @@ fun AddNewFormFab( createNewForm: ()-> Unit) {
 @Composable
 fun AllformsLoadingState(screenState: State<SuccessState<List<AnswerForm>>>) {
     Column {
+
+        Text(screenState.value.data.toString())
+        Text(screenState.value.toString())
+        Text(screenState.value.error?:"no error")
         AnimatedContent(
             targetState= screenState.value,
             transitionSpec= { slideInHorizontally(tween(500),
@@ -73,10 +78,11 @@ fun AllformsLoadingState(screenState: State<SuccessState<List<AnswerForm>>>) {
             }
         ) { transitionState ->
             when (transitionState) {
-                SuccessState.Loading<List<AnswerForm>>() -> { CircularLoading()}
-                SuccessState.Failure<List<AnswerForm>>() -> { Text("Sorry Something Went Wrong")}
-                SuccessState.Success<List<AnswerForm>>() -> {AnswerFormList(transitionState.data ?: emptyList<AnswerForm>())}
-                else -> {Text("else Branch")}
+                is SuccessState.Loading<List<AnswerForm>> -> { CircularLoading()}
+                is SuccessState.Failure<List<AnswerForm>> -> { Text("Sorry Something Went Wrong")}
+                is SuccessState.Success<List<AnswerForm>> -> {
+                    AnswerFormList(transitionState.data ?: emptyList<AnswerForm>())
+                }
             }
         }
     }

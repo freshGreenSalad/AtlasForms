@@ -18,9 +18,7 @@ class UseCaseGetAllForms @Inject constructor(
         return runBlocking(
             CoroutineName("Sample CN") + SupervisorJob() + dispatcher
         ) {
-
             allFormsRepository.GetAllForms()
-                SuccessState.Success(emptyList<AnswerForm>())
         }
     }
 }

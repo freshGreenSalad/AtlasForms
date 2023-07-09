@@ -1,9 +1,6 @@
 package com.example.atlasforms.Di
 
-import com.example.atlasforms.common.data.Room.AtlasDatabase
-import com.example.atlasforms.common.data.Room.FormDao
-import com.example.atlasforms.common.data.Room.QuestionDao
-import com.example.atlasforms.common.data.Room.mulitchoiceQuestionsDao
+import com.example.atlasforms.common.data.Room.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,9 +14,6 @@ object DaoModule {
     fun provideFormDao(database: AtlasDatabase): FormDao = database.formDao()
 
     @Provides
-    fun provideQuestionDao(database: AtlasDatabase): QuestionDao = database.questionDao()
-
-    @Provides
-    fun provideMultichoiceQuestionDaoDao(database: AtlasDatabase): mulitchoiceQuestionsDao = database.multiChoiceQuestionDao()
+    fun provideQuestionDao(database: AtlasDatabase): AnswerFormDao = database.answerFormDao()
 
 }

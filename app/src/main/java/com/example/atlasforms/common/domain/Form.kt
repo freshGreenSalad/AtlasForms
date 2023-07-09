@@ -32,31 +32,3 @@ data class OfMultiChoiceQuestions(
     @PrimaryKey val id: Int,
     val question: String
 )
-
-class FormConverter {
-    @TypeConverter
-    fun fromQuesitonList(listQuestion: List<Question?>?): String? {
-        return Json.encodeToString(listQuestion)
-    }
-
-    @TypeConverter
-    fun toQuestionList(questionList: String?): List<Question> {
-        if (questionList == null) {
-            return emptyList<Question>()
-        }
-        return Json.decodeFromString<List<Question>>(questionList)
-    }
-
-    @TypeConverter
-    fun fromMultiList(listQuestion: List<OfMultiChoiceQuestions?>?): String? {
-        return Json.encodeToString(listQuestion)
-    }
-
-    @TypeConverter
-    fun toMultiList(questionList: String?): List<OfMultiChoiceQuestions> {
-        if (questionList == null) {
-            return emptyList<OfMultiChoiceQuestions>()
-        }
-        return Json.decodeFromString<List<OfMultiChoiceQuestions>>(questionList)
-    }
-}

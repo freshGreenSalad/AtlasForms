@@ -63,10 +63,10 @@ class FormToAnswerFormConverter(){
                 listOfMultiChoiceQuestions = question.listOfMultiChoiceQuestions,
                 chosenMultiChoiceAnswer = "",
                 question = question.question,
-                answer = "",
+                answer =  if(QuestionType.fromInt(question.questionType) == QuestionType.BooleanQuestion){"false"}else{""} ,
                 isAnswered = false,
                 questionNumber = question.questionNumber,
-                questionType =question.questionType
+                questionType = QuestionType.fromInt(question.questionType)
             )
             answerList.add(answerQuestion)
         }

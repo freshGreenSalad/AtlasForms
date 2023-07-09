@@ -1,7 +1,10 @@
 package com.example.atlasforms.features.newForm.data
 
+import android.util.Log
+import com.example.atlasforms.common.data.Room.AnswerFormDao
 import com.example.atlasforms.common.data.Room.FormDao
 import com.example.atlasforms.common.data.http.BasicHttpReqests
+import com.example.atlasforms.common.domain.AnswerForm
 import com.example.atlasforms.common.domain.Form
 import com.example.atlasforms.common.domain.SuccessState
 import io.ktor.client.statement.*
@@ -12,7 +15,8 @@ import javax.inject.Inject
 
 class FormRepository @Inject constructor(
     private val httpClient: BasicHttpReqests,
-    private val formDao: FormDao
+    private val formDao: FormDao,
+    private val answerFormDao: AnswerFormDao,
 ): FormRepositoryInterface {
 
     override suspend fun getMainFormConnected(): SuccessState<Form> {
@@ -24,6 +28,7 @@ class FormRepository @Inject constructor(
 
         return try{
             val httpForm = if (response.data == null){
+                Log.d("FormRepository getMainFormConnected try encodetojson", "failure")
                 Json.encodeToString(Form())
             } else {
                 response.data.bodyAsText()
@@ -45,8 +50,12 @@ class FormRepository @Inject constructor(
         }
     }
 
-    override suspend fun replaceMain(form: Form) {
+    private fun replaceMain(form: Form) {
         formDao.nukeTable()
         formDao.insertAll(form)
+    }
+
+    override fun saveAnswerForm(form: AnswerForm) {
+        answerFormDao.insertAll(form)
     }
 }

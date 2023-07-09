@@ -1,5 +1,6 @@
 package com.example.atlasforms.features.displayAllForms.presentation
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,10 +15,11 @@ class AllFormsViewModel @Inject constructor(
     useCaseGetAllForms: UseCaseGetAllForms
 ): ViewModel() {
 
-    private val _AllForms = mutableStateOf<SuccessState<List<AnswerForm>>>(SuccessState.Loading<List<AnswerForm>>())
+    private val _AllForms = mutableStateOf<SuccessState<List<AnswerForm>>>(SuccessState.Loading())
     val AllForms: State<SuccessState<List<AnswerForm>>> = _AllForms
 
     init {
         _AllForms.value = useCaseGetAllForms.invoke()
+        Log.d("usecae",  useCaseGetAllForms.invoke().toString())
     }
 }

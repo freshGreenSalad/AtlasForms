@@ -12,7 +12,7 @@ fun NavGraphBuilder.AllForms(navController: NavController){
         val viewModel = hiltViewModel<AllFormsViewModel>()
         AllFormsScaffold(
             forms = viewModel.AllForms,
-
+            navigateToNewFormPage = {navController.navigate(NavigationDestinations.newForm)}
         )
     }
 }

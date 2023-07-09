@@ -1,5 +1,6 @@
 package com.example.atlasforms.common.data.http
 
+import android.util.Log
 import com.example.atlasforms.common.domain.HttpRequestConstants
 import com.example.atlasforms.common.domain.SuccessState
 import io.ktor.client.*
@@ -14,10 +15,13 @@ class BasicHttpReqests @Inject constructor(
 
     suspend fun GetMainForm(): SuccessState<HttpResponse> {
         return try {
+            Log.d("BassicHttpRequests get Main form", "success")
             SuccessState.Success(client.get(HttpRequestConstants.getMain) {
                 contentType(ContentType.Application.Json)
             })
         } catch (e:Exception){
+            Log.d("BassicHttpRequests get Main form",e.toString())
+            Log.d("BassicHttpRequests get Main form", "failure")
             SuccessState.Failure()
         }
     }
