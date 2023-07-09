@@ -1,4 +1,4 @@
-package com.example.atlasforms.features.getForm.data
+package com.example.atlasforms.features.newForm.data
 
 import com.example.atlasforms.common.domain.Form
 import com.example.atlasforms.common.domain.SuccessState
