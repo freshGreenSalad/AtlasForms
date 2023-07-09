@@ -9,10 +9,10 @@ import kotlinx.serialization.json.Json
 @Serializable
 @Entity
 data class Form(
-    @PrimaryKey val id: Int,
-    val dateCreated: String,
-    val email: String,
-    val name: String,
+    @PrimaryKey val id: Int = 0,
+    val dateCreated: String = "",
+    val email: String = "",
+    val name: String = "",
     val questionList: List<Question> = emptyList<Question>()
 )
 

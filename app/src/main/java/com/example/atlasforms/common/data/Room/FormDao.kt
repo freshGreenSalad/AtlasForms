@@ -7,14 +7,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FormDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg plant: Form)
+    fun insertAll(vararg form: Form)
 
     @Query("SELECT * FROM Form")
-    fun getall(): Flow<List<Form>>
+    fun getall(): List<Form>
 
     @Update
     fun updatePeople (vararg: Form)
 
-    @Delete
-    fun deletePeople (plant: Form)
+    @Query("DELETE FROM Form")
+    fun nukeTable()
 }
