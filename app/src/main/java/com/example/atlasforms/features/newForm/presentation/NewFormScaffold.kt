@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,13 +32,14 @@ import com.example.atlasforms.features.newForm.presentation.viewModel.OnEventNew
 fun NewFormScaffold(
     form: State<SuccessState<AnswerForm>>,
     event: (OnEventNewForm) -> Unit,
+    backToMainScreen:()-> Unit
 ) {
 
 
 
     Scaffold(
         topBar = {AtlasTopAppBar("NewForm")},
-        bottomBar = {AtlasBottomBar(event)}
+        bottomBar = {AtlasBottomBar(event,backToMainScreen)}
     ) {
         Box(
             Modifier
@@ -50,13 +52,16 @@ fun NewFormScaffold(
 }
 
 @Composable
-fun AtlasBottomBar(event: (OnEventNewForm) -> Unit) {
+fun AtlasBottomBar(event: (OnEventNewForm) -> Unit, backToMainScreen:()-> Unit) {
     BottomAppBar {
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = { event(OnEventNewForm.saveForm) }) {
+            Button(onClick = {
+                event(OnEventNewForm.saveForm)
+                backToMainScreen()
+            }) {
                 Text("save")
             }
             Button(onClick = { event(OnEventNewForm.sendForm) }) {
@@ -95,16 +100,37 @@ fun NewformLoadingState(form: State<SuccessState<AnswerForm>>,updateAnswer: (OnE
 fun Form(form: State<SuccessState<AnswerForm>>,updateAnswer: (OnEventNewForm) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()){
         item{
-            form.value.data?.let { Text(it.name) }
+            form.value.data?.let { Text(text = it.name, style = MaterialTheme.typography.titleMedium,)}
         }
         form.value.data?.let {
-            items(it.questionList){ question->
+            itemsIndexed(it.questionList){ index,question->
+                val enabled = remember(form.value.data!!.questionList[index].isAnswered) {
+                    derivedStateOf {
+                        if (index == 0) {
+                            true
+                        } else {
+                            it.questionList
+                                .filter { questionLocal -> questionLocal.questionNumber - 1 < index }
+                                .all { questionLocalOne -> questionLocalOne.isAnswered }
+                        }
+                    }
+                }
+                val answer = remember (question.isAnswered){ mutableStateOf("") }
+                val shouldMarkAscompleted = remember(question.isAnswered) {
+                    derivedStateOf {
+                        answer.value != ""
+                    }
+                }
+
                 when(question.questionType){
-                    QuestionType.MultiChoice -> {MultiChoiceQuestion(question,updateAnswer)}
-                    QuestionType.TextQuestion -> {TextQuestion(question,updateAnswer)}
-                    QuestionType.NumberQuestion -> {NumberQuestion(question,updateAnswer)}
-                    QuestionType.BooleanQuestion -> {BooleanQuestion(question,updateAnswer)}
-                    QuestionType.RadioQuestion -> {RadioQuestion(question,updateAnswer)}
+                    QuestionType.MultiChoice -> {MultiChoiceQuestion(question,updateAnswer,enabled.value)}
+                    QuestionType.TextQuestion -> {
+
+                        TextQuestion(question,updateAnswer,enabled.value, {answer.value = it}, answer, shouldMarkAscompleted)
+                    }
+                    QuestionType.NumberQuestion -> {NumberQuestion(question,updateAnswer,enabled.value)}
+                    QuestionType.BooleanQuestion -> {BooleanQuestion(question,updateAnswer,enabled.value)}
+                    QuestionType.RadioQuestion -> {RadioQuestion(question,updateAnswer,enabled.value)}
                 }
             }
         }

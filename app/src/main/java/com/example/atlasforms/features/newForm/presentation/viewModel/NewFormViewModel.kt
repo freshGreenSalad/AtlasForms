@@ -12,6 +12,9 @@ import com.example.atlasforms.features.newForm.domain.UseCaseGetNewForm
 import com.example.atlasforms.features.newForm.domain.UseCaseSaveForm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,8 +28,8 @@ class NewFormViewModel @Inject constructor(
     val scope = viewModelScope
 
     private val _newForm =
-        mutableStateOf<SuccessState<AnswerForm>>(SuccessState.Loading<AnswerForm>())
-    val newForm: State<SuccessState<AnswerForm>> = _newForm
+        MutableStateFlow<SuccessState<AnswerForm>>(SuccessState.Loading<AnswerForm>())
+    val newForm: StateFlow<SuccessState<AnswerForm>> = _newForm.asStateFlow()
 
     private lateinit var noStatePushForm :AnswerForm
 
@@ -59,7 +62,25 @@ class NewFormViewModel @Inject constructor(
             is OnEventNewForm.sendForm -> {
                 Log.d("updated form" , noStatePushForm.toString())
             }
-            else -> {}
+            is OnEventNewForm.isEnabled -> {
+                noStatePushForm =
+                    noStatePushForm.copy(
+                        questionList = noStatePushForm.questionList.map { answerQuestion ->
+                            if(answerQuestion.id == event.id) {
+                                answerQuestion.copy(
+                                    isAnswered = event.enabled
+                                )
+                            } else {answerQuestion}
+                        }
+                    )
+                _newForm.value.data?.copy(questionList = noStatePushForm.questionList.map { answerQuestion ->
+                    if(answerQuestion.id == event.id) {
+                        answerQuestion.copy(
+                            isAnswered = event.enabled
+                        )
+                    } else {answerQuestion}
+                })
+            }
         }
     }
 }

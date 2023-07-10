@@ -10,6 +10,8 @@ import com.example.atlasforms.features.newForm.presentation.viewModel.NewFormVie
 fun NavGraphBuilder.NewForm(navController: NavController){
     composable(NavigationDestinations.newForm) {
         val viewModel = hiltViewModel<NewFormViewModel>()
-        NewFormScaffold(viewModel.newForm, viewModel::NewFormEvent)
+        NewFormScaffold(viewModel.newForm, viewModel::NewFormEvent,
+            { navController.navigate(NavigationDestinations.AllForms) }
+        )
     }
 }

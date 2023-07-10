@@ -1,5 +1,6 @@
-package com.example.atlasforms.features.newForm.presentation
+package com.example.atlasforms.features.updateForm.presentation.questions
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,13 +20,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.atlasforms.common.domain.AnswerQuestion
-import com.example.atlasforms.features.newForm.presentation.viewModel.OnEventNewForm
+import com.example.atlasforms.features.updateForm.presentation.viewModel.OnEventUpdate
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-
 @Composable
-fun MultiChoiceQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Unit, enabled:Boolean) {
+fun MultiChoiceQuestionUpdate(question: AnswerQuestion, updateAnswer: (OnEventUpdate) -> Unit) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -34,7 +35,7 @@ fun MultiChoiceQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm)
             .clip(RoundedCornerShape(8.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
     ) {
-        Box(Modifier.padding(4.dp)){Text(question.questionNumber.toString()+".")}
+        Box(Modifier.padding(4.dp)){ Text(question.questionNumber.toString()+".") }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(question.question,modifier = Modifier.padding(4.dp))
 
@@ -44,18 +45,22 @@ fun MultiChoiceQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm)
                     .background(color = Color.Black)
                     .height(1.dp))
 
-            val answer = remember { mutableStateListOf<String>() }
+            val answer = remember { mutableStateListOf<String>( *(try {
+                        Json.decodeFromString<List<String>>(question.answer)
+                    }catch(e:Exception){
+                        emptyList<String>()
+                    }.toTypedArray()
+                    ) )}
             for (option in question.listOfMultiChoiceQuestions) {
-                MultiChoiceOption(
+                MultiChoiceOptionUpdate(
                     optionName = option.question,
                     selected = answer.contains(option.question),
-                    enabled = enabled,
                     onClick = {
                         if (answer.contains(it)){
                             answer.remove(it)
                         } else answer.add(it)
                         updateAnswer(
-                            OnEventNewForm.updateQuestionAnswer(
+                            OnEventUpdate.UpdateQuestionAnswer(
                                 Json.encodeToString<List<String>>(answer.toList()),
                                 question.id
                             )
@@ -68,13 +73,12 @@ fun MultiChoiceQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm)
 }
 
 @Composable
-fun MultiChoiceOption(optionName: String, selected:Boolean, onClick:(String)->Unit,enabled:Boolean) {
+fun MultiChoiceOptionUpdate(optionName: String, selected:Boolean, onClick:(String)->Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(4.dp)) {
         Checkbox(
-            enabled = enabled,
             modifier = Modifier.clickable { onClick(optionName)},
             checked = selected,
             onCheckedChange = null // null recommended for accessibility with screenreaders
@@ -89,15 +93,7 @@ fun MultiChoiceOption(optionName: String, selected:Boolean, onClick:(String)->Un
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextQuestion(
-    question: AnswerQuestion,
-    updateAnswer: (OnEventNewForm) -> Unit ,
-    enabled:Boolean,
-    updateAnswerLocal:(String)->Unit, // will force recomp alevel up
-    answer: State<String>,
-    shouldMarkAscompleted: State<Boolean>
-) {
-
+fun TextQuestionUpdate(question: AnswerQuestion, updateAnswer: (OnEventUpdate) -> Unit ) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -106,26 +102,18 @@ fun TextQuestion(
             .clip(RoundedCornerShape(8.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
     ) {
-        Box(Modifier.padding(4.dp)){Text(question.questionNumber.toString()+".")}
+        Box(Modifier.padding(4.dp)){ Text(question.questionNumber.toString()+".") }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            /*val answer = remember { mutableStateOf("") }
-            val enabled = remember {
-                derivedStateOf {
-                    answer.value != ""
-                }
-            }*/
+            val answer = remember { mutableStateOf(question.answer) }
             Text(text = question.question, modifier = Modifier.padding(4.dp), )
             Box(
                 Modifier
                     .fillMaxWidth()
                     .background(color = Color.Black)
                     .height(1.dp))
-            TextField(
-                enabled = enabled,
-                modifier = Modifier.fillMaxWidth(), value = answer.value, onValueChange = {
-                    updateAnswerLocal( it)
-                updateAnswer(OnEventNewForm.updateQuestionAnswer(it,  question.id))
-                    updateAnswer(OnEventNewForm.isEnabled(enabled = shouldMarkAscompleted.value, id = question.id))
+            TextField(modifier = Modifier.fillMaxWidth(), value = answer.value, onValueChange = {
+                answer.value = it
+                updateAnswer(OnEventUpdate.UpdateQuestionAnswer(it,  question.id))
             })
         }
     }
@@ -134,7 +122,7 @@ fun TextQuestion(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NumberQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Unit,enabled:Boolean ) {
+fun NumberQuestionUpdate(question: AnswerQuestion, updateAnswer: (OnEventUpdate) -> Unit ) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -144,8 +132,8 @@ fun NumberQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> U
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         val focusManager = LocalFocusManager.current
-        val answer = remember { mutableStateOf("") }
-        Box(Modifier.padding(4.dp)){Text(question.questionNumber.toString()+".")}
+        val answer = remember { mutableStateOf(question.answer) }
+        Box(Modifier.padding(4.dp)){ Text(question.questionNumber.toString()+".") }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
             Text(text = question.question, modifier = Modifier.padding(4.dp), )
@@ -155,7 +143,6 @@ fun NumberQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> U
                     .background(color = Color.Black)
                     .height(1.dp))
             TextField(
-                enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
                 value = answer.value,
                 keyboardActions = KeyboardActions(onDone = {focusManager.clearFocus()}),
@@ -165,7 +152,7 @@ fun NumberQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> U
                 ),
                 onValueChange = {
                     answer.value = it
-                    updateAnswer(OnEventNewForm.updateQuestionAnswer(it, question.id))
+                    updateAnswer(OnEventUpdate.UpdateQuestionAnswer(it, question.id))
                 }
             )
         }
@@ -173,7 +160,7 @@ fun NumberQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> U
 }
 
 @Composable
-fun BooleanQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Unit,enabled:Boolean) {
+fun BooleanQuestionUpdate(question: AnswerQuestion, updateAnswer: (OnEventUpdate) -> Unit) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -184,7 +171,7 @@ fun BooleanQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> 
     ) {
         val answer = remember { mutableStateOf(question.answer) }
 
-        Box(Modifier.padding(4.dp)){Text(question.questionNumber.toString()+".")}
+        Box(Modifier.padding(4.dp)){ Text(question.questionNumber.toString()+".") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
 
@@ -201,12 +188,11 @@ fun BooleanQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> 
                         .fillMaxWidth()
                         .padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
-                        enabled = enabled,
                         selected = answer.value == "true",
                         onClick = {
                             answer.value = "true"
                             updateAnswer(
-                                OnEventNewForm.updateQuestionAnswer(
+                                OnEventUpdate.UpdateQuestionAnswer(
                                     answer.value,
                                     question.id
                                 )
@@ -221,12 +207,11 @@ fun BooleanQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> 
                         .padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
 
                     RadioButton(
-                        enabled = enabled,
                         selected = answer.value == "false",
                         onClick = {
                             answer.value = "false"
                             updateAnswer(
-                                OnEventNewForm.updateQuestionAnswer(
+                                OnEventUpdate.UpdateQuestionAnswer(
                                     answer.value,
                                     question.id
                                 )
@@ -241,7 +226,7 @@ fun BooleanQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> 
 }
 
 @Composable
-fun RadioQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Unit,enabled:Boolean) {
+fun RadioQuestionUpdate(question: AnswerQuestion, updateAnswer: (OnEventUpdate) -> Unit) {
 
     Box(
         Modifier
@@ -252,7 +237,7 @@ fun RadioQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Un
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
     ) {
 
-        Box(Modifier.padding(4.dp)){Text(question.questionNumber.toString()+".")}
+        Box(Modifier.padding(4.dp)){ Text(question.questionNumber.toString()+".") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Text(question.question,modifier = Modifier.padding(4.dp))
@@ -263,16 +248,15 @@ fun RadioQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Un
                     .height(1.dp))
 
 
-            val answer = remember { mutableStateOf("") }
+            val answer = remember { mutableStateOf(question.answer) }
             for (option in question.listOfMultiChoiceQuestions) {
-                RadioOption(
-                    enabled = enabled,
+                RadioOptionUpdate(
                     optionName = option.question,
                     selected = option.question == answer.value,
                     onClick = {
                         answer.value = it
                         updateAnswer(
-                            OnEventNewForm.updateQuestionAnswer(
+                            OnEventUpdate.UpdateQuestionAnswer(
                                 answer.value,
                                 question.id
                             )
@@ -285,13 +269,12 @@ fun RadioQuestion(question: AnswerQuestion, updateAnswer: (OnEventNewForm) -> Un
 }
 
 @Composable
-fun RadioOption(optionName: String, selected:Boolean, onClick:(String)->Unit, enabled: Boolean) {
+fun RadioOptionUpdate(optionName: String, selected:Boolean, onClick:(String)->Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
         RadioButton(
-            enabled = enabled,
             selected = selected,
             onClick = { onClick(optionName) }
         )

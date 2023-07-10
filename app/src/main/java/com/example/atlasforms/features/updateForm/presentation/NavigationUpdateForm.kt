@@ -16,6 +16,7 @@ fun NavGraphBuilder.updateForm(navController: NavController){
         ) {navBackStackEntry ->
         val viewmodel = hiltViewModel<updateViewModel>()
         val id = navBackStackEntry.arguments?.getString("userId")?.toInt()!!
-        updateFormScaffold(id, viewmodel::event, viewmodel.newForm)
+        updateFormScaffold(id, viewmodel::event, viewmodel.newForm,
+            { navController.navigate(NavigationDestinations.AllForms) })
     }
 }
