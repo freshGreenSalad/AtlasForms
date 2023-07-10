@@ -14,7 +14,11 @@ fun NavGraphBuilder.AllForms(navController: NavController){
         AllFormsScaffold(
             forms = viewModel.AllForms,
             navigateToNewFormPage = {navController.navigate(NavigationDestinations.newForm)},
-            event = viewModel::NewFormEvent
+            event = viewModel::NewFormEvent,
+            navigateToUpdateForm = {id ->
+                navController.navigate(
+                NavigationDestinations.updateForm+"/${id.toString()}"
+            )}
         )
     }
 }

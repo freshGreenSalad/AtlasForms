@@ -11,5 +11,7 @@ interface FormRepositoryInterface {
 
     fun saveAnswerForm(form: AnswerForm)
 
+    suspend fun getAnswerFormById(id: Int):AnswerForm
+
 
 }

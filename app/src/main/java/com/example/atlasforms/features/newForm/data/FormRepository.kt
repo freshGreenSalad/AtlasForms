@@ -58,4 +58,8 @@ class FormRepository @Inject constructor(
     override fun saveAnswerForm(form: AnswerForm) {
         answerFormDao.insertAll(form)
     }
+
+    override suspend fun getAnswerFormById(id: Int):AnswerForm {
+        return answerFormDao.getbyId(id)
+    }
 }

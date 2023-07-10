@@ -116,4 +116,6 @@ dependencies {
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+
+    implementation 'com.mailersend:java-sdk:1.0.0'
 }

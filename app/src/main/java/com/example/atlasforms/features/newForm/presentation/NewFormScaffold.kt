@@ -1,36 +1,30 @@
 package com.example.atlasforms.features.newForm.presentation
 
-import android.widget.RadioGroup
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.startActivity
 import com.example.atlasforms.common.domain.AnswerForm
-import com.example.atlasforms.common.domain.AnswerQuestion
 import com.example.atlasforms.common.domain.QuestionType
 import com.example.atlasforms.common.domain.SuccessState
 import com.example.atlasforms.common.presentation.CircularLoading
+import com.example.atlasforms.common.presentation.SendEmailButton
 import com.example.atlasforms.features.displayAllForms.presentation.AtlasTopAppBar
 import com.example.atlasforms.features.newForm.presentation.viewModel.OnEventNewForm
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +32,9 @@ fun NewFormScaffold(
     form: State<SuccessState<AnswerForm>>,
     event: (OnEventNewForm) -> Unit,
 ) {
+
+
+
     Scaffold(
         topBar = {AtlasTopAppBar("NewForm")},
         bottomBar = {AtlasBottomBar(event)}
@@ -53,7 +50,7 @@ fun NewFormScaffold(
 }
 
 @Composable
-fun AtlasBottomBar( event: (OnEventNewForm) -> Unit,) {
+fun AtlasBottomBar(event: (OnEventNewForm) -> Unit) {
     BottomAppBar {
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -65,6 +62,7 @@ fun AtlasBottomBar( event: (OnEventNewForm) -> Unit,) {
             Button(onClick = { event(OnEventNewForm.sendForm) }) {
                 Text("send")
             }
+            //SendEmailButton(form)
         }
     }
 }

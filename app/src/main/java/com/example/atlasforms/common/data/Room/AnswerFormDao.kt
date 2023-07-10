@@ -12,6 +12,9 @@ interface AnswerFormDao {
     @Query("SELECT * FROM AnswerForm")
     fun getall(): Flow<List<AnswerForm>>
 
+    @Query("SELECT * FROM AnswerForm WHERE id=:id")
+    fun getbyId(id:Int): AnswerForm
+
     @Update
     fun update (vararg: AnswerForm)
 
